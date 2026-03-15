@@ -97,6 +97,7 @@ html, body {
 }
 #panel-filters,
 #panel-results {
+  display: flex;
   flex-direction: column;
   gap: 12px;
 }
@@ -242,7 +243,7 @@ html, body {
   flex-shrink: 0;
 }
 .accordion + .accordion {
-  margin-top: 1px;
+  margin-top: 0;
 }
 .accordion-btn {
   width: 100%;
