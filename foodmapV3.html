@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Food Services Locator</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Fraunces:ital,wght@0,700;1,400&display=swap" rel="stylesheet" />
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="sidebar">
+
+        <!-- Fixed header: title + tab bar -->
+        <div class="sidebar-header">
+          <h1>🥦 Food Services Locator</h1>
+          <p>Find food resources near you in Santa Clara County</p>
+        </div>
+        <div class="tab-bar-wrap">
+          <div class="tab-bar">
+            <button class="tab-btn active" onclick="switchTab('filters')" id="tab-filters">🔧 Filters</button>
+            <button class="tab-btn" onclick="switchTab('results')" id="tab-results">
+              📋 Results <span id="resultCount">-</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Scrollable body -->
+        <div class="sidebar-body">
+
+          <!-- FILTERS PANEL -->
+          <div id="panel-filters">
+
+            <!-- Search bars (always visible, not in accordion) -->
+            <div class="filter-section">
+              <div class="section-label">Keyword Search</div>
+              <div class="search-wrap">
+                <span class="search-icon">🔍</span>
+                <input id="search-keyword" placeholder="Organization name, service…" autocomplete="off" />
+              </div>
+            </div>
+
+            <div class="filter-section">
+              <div class="section-label">Location Search</div>
+              <div class="search-wrap">
+                <span class="search-icon">🗺</span>
+                <input id="search-location" placeholder="Address, City, or ZIP…" autocomplete="off" />
+              </div>
+              <button class="btn-locate" onclick="locateUser()">📍 Use My Current Location</button>
+            </div>
+
+            <button class="btn-reset" onclick="resetFilters()">✕ Reset All Filters</button>
+
+            <!-- ACCORDION: Distance -->
+            <div class="accordion">
+              <button class="accordion-btn" onclick="toggleAccordion(this)">
+                <span class="acc-label">Distance Radius</span>
+                <span class="acc-badge" id="acc-badge-radius"></span>
+                <span class="acc-arrow">›</span>
+              </button>
+              <div class="accordion-body">
+                <div class="radius-row">
+                  <span class="radius-hint">Drag to filter by distance</span>
+                  <span class="radius-badge"><span id="radiusValue">0</span> mi</span>
+                </div>
+                <input type="range" id="radius" min="0" max="50" class="slider" step="1" value="0" />
+              </div>
+            </div>
+
+            <!-- ACCORDION: Services -->
+            <div class="accordion">
+              <button class="accordion-btn" onclick="toggleAccordion(this)">
+                <span class="acc-label">Services Offered</span>
+                <span class="acc-badge" id="acc-badge-services"></span>
+                <span class="acc-arrow">›</span>
+              </button>
+              <div class="accordion-body">
+                <div id="serviceFilters" class="filter-group"><p style="font-size:0.78rem;color:var(--text-muted);padding:4px 0">Loading services…</p></div>
+              </div>
+            </div>
+
+            <!-- ACCORDION: Day of Week -->
+            <div class="accordion">
+              <button class="accordion-btn" onclick="toggleAccordion(this)">
+                <span class="acc-label">Day of Week</span>
+                <span class="acc-badge" id="acc-badge-days"></span>
+                <span class="acc-arrow">›</span>
+              </button>
+              <div class="accordion-body">
+                <div class="filter-group">
+                  <label><input type="checkbox" class="dayFilter" value="Monday" /> Monday</label>
+                  <label><input type="checkbox" class="dayFilter" value="Tuesday" /> Tuesday</label>
+                  <label><input type="checkbox" class="dayFilter" value="Wednesday" /> Wednesday</label>
+                  <label><input type="checkbox" class="dayFilter" value="Thursday" /> Thursday</label>
+                  <label><input type="checkbox" class="dayFilter" value="Friday" /> Friday</label>
+                  <label><input type="checkbox" class="dayFilter" value="Saturday" /> Saturday</label>
+                  <label><input type="checkbox" class="dayFilter" value="Sunday" /> Sunday</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- ACCORDION: Areas Served -->
+            <div class="accordion">
+              <button class="accordion-btn" onclick="toggleAccordion(this)">
+                <span class="acc-label">Areas Served</span>
+                <span class="acc-badge" id="acc-badge-areas"></span>
+                <span class="acc-arrow">›</span>
+              </button>
+              <div class="accordion-body">
+                <div id="areasFilters" class="filter-group"><p style="font-size:0.78rem;color:var(--text-muted);padding:4px 0">Loading areas…</p></div>
+              </div>
+            </div>
+
+            <!-- ACCORDION: Parent Organization -->
+            <div class="accordion">
+              <button class="accordion-btn" onclick="toggleAccordion(this)">
+                <span class="acc-label">Parent Organization</span>
+                <span class="acc-badge" id="acc-badge-parent"></span>
+                <span class="acc-arrow">›</span>
+              </button>
+              <div class="accordion-body">
+                <div id="parentOrgFilters" class="filter-group"><p style="font-size:0.78rem;color:var(--text-muted);padding:4px 0">Loading organizations…</p></div>
+              </div>
+            </div>
+
+          </div>
+          <!-- /panel-filters -->
+
+          <!-- RESULTS PANEL -->
+          <div id="panel-results" style="display:none;">
+            <div id="locationList">
+              <div class="state-msg"><span class="emoji">🌿</span>Loading locations…</div>
+            </div>
+          </div>
+
+        </div>
+        <!-- /sidebar-body -->
+      </div>
+      <!-- /sidebar -->
+
+      <div id="map"></div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
