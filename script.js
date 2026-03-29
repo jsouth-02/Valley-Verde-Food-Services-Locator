@@ -10,7 +10,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 const SHEET_URL =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vR5x10jBXIWGB479G39llMNUZEGZwUqg92A4XjhdVaPdPmnhBijcCGUqtt7jVy4UCCBfoCtnYEl2VEv/pub?gid=1962020960&single=true&output=csv";
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vR5x10jBXIWGB479G39llMNUZEGZwUqg92A4XjhdVaPdPmnhBijcCGUqtt7jVy4UCCBfoCtnYEl2VEv/pub?gid=431341540&single=true&output=csv";
 
 // ── Map setup ──────────────────────────────────────────────────
 const map = L.map("map", { maxZoom: 18 }).setView([37.328928, -121.911259], 11);
